@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Háromszög Kalkulátor</title>
+    <style>
+        :root {
+            --color-primary: #2180 8d;
+            --color-primary-hover: #1d745c;
+            --color-primary-active: #1a7273;
+            --color-text: #134252;
+            --color-text-secondary: #626c71;
+            --color-background: #fcfcf9;
+            --color-surface: #fffff5;
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-error: #c0152f;
+            --color-success: #218089;
+            --color-btn-text: #fcfcf9;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --radius-base: 8px;
+            --duration-normal: 250ms;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px;
+            color: var(--color-text);
+        }
+
+        body {
+            margin: 0;
+            padding: var(--space-16);
+            background-color: var(--color-background);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 var(--space-24) 0;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--color-text);
+            text-align: center;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-20);
+            margin-bottom: var(--space-20);
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            padding: var(--space-20);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--space-16);
+            color: var(--color-text);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-16);
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: var(--space-8);
+            color: var(--color-text);
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: var(--space-8) var(--space-12);
+            font-size: 14px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            background-color: var(--color-background);
+            color: var(--color-text);
+            transition: border-color var(--duration-normal);
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 128, 141, 0.15);
+        }
+
+        input[type="number"]::placeholder {
+            color: var(--color-text-secondary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: var(--space-12);
+            margin-top: var(--space-20);
+        }
+
+        button {
+            flex: 1;
+            padding: var(--space-12) var(--space-16);
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            transition: background-color var(--duration-normal);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-btn-text);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+
+        .btn-primary:active {
+            background-color: var(--color-primary-active);
+        }
+
+        .btn-secondary {
+            background-color: rgba(94, 82, 64, 0.12);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(94, 82, 64, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .result-group {
+            margin-bottom: var(--space-16);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-12);
+            background-color: var(--color-background);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--space-8);
+            font-size: 14px;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: var(--color-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .error {
+            color: var(--color-error);
+            font-size: 13px;
+            margin-top: var(--space-8);
+            padding: var(--space-12);
+            background-color: rgba(192, 21, 47, 0.08);
+            border-radius: var(--radius-base);
+            border-left: 3px solid var(--color-error);
+            display: none;
+        }
+
+        .error.visible {
+            display: block;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            background-color: var(--color-background);
+            border-radius: var(--radius-base);
+            border: 1px solid var(--color-border);
+        }
+
+        .diagram-container {
+            text-align: center;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: var(--space-12);
+            text-align: center;
+        }
+
+        .unit-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: var(--space-4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📐 Háromszög Kalkulátor</h1>
+
+        <div class="main-layout">
+            <!-- Bemenet panel -->
+            <div class="card">
+                <div class="section-title">Ismert adatok</div>
+
+                <div class="form-group">
+                    <label for="side-a">Első oldal (a):</label>
+                    <input type="number" id="side-a" placeholder="Pl. 5" min="0.1" step="0.1">
+                    <div class="unit-label">hossz egység</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="side-b">Második oldal (b):</label>
+                    <input type="number" id="side-b" placeholder="Pl. 7" min="0.1" step="0.1">
+                    <div class="unit-label">hossz egység</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="angle-c">Köztük lévő szög (C):</label>
+                    <input type="number" id="angle-c" placeholder="Pl. 60" min="0.1" max="179.9" step="0.1">
+                    <div class="unit-label">fok</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="calculateTriangle()">Számítás</button>
+                    <button class="btn-secondary" onclick="resetForm()">Törlés</button>
+                </div>
+
+                <div class="error" id="error"></div>
+            </div>
+
+            <!-- Eredmények panel -->
+            <div class="card">
+                <div class="section-title">Eredmények</div>
+
+                <div class="results" id="results">
+                    <div class="result-group">
+                        <div class="result-item">
+                            <span class="result-label">Harmadik oldal (c):</span>
+                            <span class="result-value" id="result-side-c">-</span>
+                        </div>
+                    </div>
+
+                    <div class="result-group">
+                        <div class="result-item">
+                            <span class="result-label">A szög:</span>
+                            <span class="result-value" id="result-angle-a">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">B szög:</span>
+                            <span class="result-value" id="result-angle-b">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">C szög:</span>
+                            <span class="result-value" id="result-angle-c">-</span>
+                        </div>
+                    </div>
+
+                    <div class="result-group">
+                        <div class="result-item">
+                            <span class="result-label">Terület:</span>
+                            <span class="result-value" id="result-area">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Kerület:</span>
+                            <span class="result-value" id="result-perimeter">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="error-placeholder" style="min-height: 40px;"></div>
+            </div>
+        </div>
+
+        <!-- Diagram -->
+        <div class="card diagram-container">
+            <div class="section-title">Háromszög diagram</div>
+            <canvas id="triangle-canvas" width="500" height="400"></canvas>
+            <div class="info-text">Az oldal és szögértékek alapján rajzolt diagram</div>
+        </div>
+    </div>
+
+    <script>
+        function calculateTriangle() {
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            errorDiv.classList.remove('visible');
+            errorDiv.textContent = '';
+
+            const sideA = parseFloat(document.getElementById('side-a').value);
+            const sideB = parseFloat(document.getElementById('side-b').value);
+            const angleC = parseFloat(document.getElementById('angle-c').value);
+
+            // Validáció
+            if (!sideA || !sideB || !angleC) {
+                showError('Kérjük, töltse ki az összes mezőt!');
+                resultsDiv.classList.remove('visible');
+                return;
+            }
+
+            if (sideA <= 0 || sideB <= 0) {
+                showError('Az oldalhosszak pozitív számonak kell lenniük!');
+                resultsDiv.classList.remove('visible');
+                return;
+            }
+
+            if (angleC <= 0 || angleC >= 180) {
+                showError('A szög 0° és 180° között kell legyen!');
+                resultsDiv.classList.remove('visible');
+                return;
+            }
+
+            try {
+                // Konvertálás radiánra
+                const angleC_rad = angleC * Math.PI / 180;
+
+                // Koszinusz tétel: c² = a² + b² - 2ab*cos(C)
+                const sideC = Math.sqrt(
+                    sideA * sideA + sideB * sideB - 2 * sideA * sideB * Math.cos(angleC_rad)
+                );
+
+                // Szinusz tétel: sin(A)/a = sin(B)/b = sin(C)/c
+                const sinA = (sideA * Math.sin(angleC_rad)) / sideC;
+                const sinB = (sideB * Math.sin(angleC_rad)) / sideC;
+
+                if (Math.abs(sinA) > 1 || Math.abs(sinB) > 1) {
+                    showError('Érvénytelen háromszög! A szögek nem lehetségesek ezekkel az oldalakkal.');
+                    resultsDiv.classList.remove('visible');
+                    return;
+                }
+
+                const angleA = Math.asin(sinA) * 180 / Math.PI;
+                const angleB = 180 - angleA - angleC;
+
+                // Terület: T = (a*b*sin(C))/2
+                const area = (sideA * sideB * Math.sin(angleC_rad)) / 2;
+
+                // Kerület
+                const perimeter = sideA + sideB + sideC;
+
+                // Eredmények megjelenítése
+                document.getElementById('result-side-c').textContent = sideC.toFixed(2);
+                document.getElementById('result-angle-a').textContent = angleA.toFixed(2) + '°';
+                document.getElementById('result-angle-b').textContent = angleB.toFixed(2) + '°';
+                document.getElementById('result-angle-c').textContent = angleC.toFixed(2) + '°';
+                document.getElementById('result-area').textContent = area.toFixed(2);
+                document.getElementById('result-perimeter').textContent = perimeter.toFixed(2);
+
+                resultsDiv.classList.add('visible');
+
+                // Diagram rajzolása
+                drawTriangle(sideA, sideB, sideC, angleA, angleB, angleC);
+            } catch (error) {
+                showError('Hiba a számítás során: ' + error.message);
+                resultsDiv.classList.remove('visible');
+            }
+        }
+
+        function drawTriangle(a, b, c, angleA, angleB, angleC) {
+            const canvas = document.getElementById('triangle-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Canvas törlése
+            ctx.fillStyle = '#fcfcf9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Skálázás
+            const maxSide = Math.max(a, b, c);
+            const scale = 200 / maxSide;
+            const offsetX = 100;
+            const offsetY = 300;
+
+            // A pont (alap bal)
+            const pointA = { x: offsetX, y: offsetY };
+
+            // B pont (alap jobb)
+            const pointB = { x: offsetX + a * scale, y: offsetY };
+
+            // C pont (szögből számított)
+            const angleA_rad = angleA * Math.PI / 180;
+            const pointC = {
+                x: offsetX + b * scale * Math.cos(angleA_rad),
+                y: offsetY - b * scale * Math.sin(angleA_rad)
+            };
+
+            // Háromszög rajzolása
+            ctx.strokeStyle = '#218089';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(pointA.x, pointA.y);
+            ctx.lineTo(pointB.x, pointB.y);
+            ctx.lineTo(pointC.x, pointC.y);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Csúcsok kitöltése
+            ctx.fillStyle = '#218089';
+            [pointA, pointB, pointC].forEach(point => {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Oldalhosszak felirása
+            const fontSize = 13;
+            ctx.font = fontSize + 'px sans-serif';
+            ctx.fillStyle = '#134252';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            // Oldal a
+            const midAB = {
+                x: (pointA.x + pointB.x) / 2,
+                y: (pointA.y + pointB.y) / 2 + 20
+            };
+            ctx.fillText('a = ' + a.toFixed(1), midAB.x, midAB.y);
+
+            // Oldal b
+            const midAC = {
+                x: (pointA.x + pointC.x) / 2 - 25,
+                y: (pointA.y + pointC.y) / 2
+            };
+            ctx.fillText('b = ' + b.toFixed(1), midAC.x, midAC.y);
+
+            // Oldal c
+            const midBC = {
+                x: (pointB.x + pointC.x) / 2 + 25,
+                y: (pointB.y + pointC.y) / 2
+            };
+            ctx.fillText('c = ' + c.toFixed(1), midBC.x, midBC.y);
+
+            // Szögfelirások
+            ctx.font = 'bold ' + fontSize + 'px sans-serif';
+            ctx.textAlign = 'center';
+
+            // A szög
+            ctx.fillText('A: ' + angleA.toFixed(1) + '°', pointA.x - 15, pointA.y - 20);
+
+            // B szög
+            ctx.fillText('B: ' + angleB.toFixed(1) + '°', pointB.x + 15, pointB.y - 20);
+
+            // C szög
+            ctx.fillText('C: ' + angleC.toFixed(1) + '°', pointC.x, pointC.y - 15);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '⚠️ ' + message;
+            errorDiv.classList.add('visible');
+        }
+
+        function resetForm() {
+            document.getElementById('side-a').value = '';
+            document.getElementById('side-b').value = '';
+            document.getElementById('angle-c').value = '';
+            document.getElementById('results').classList.remove('visible');
+            document.getElementById('error').classList.remove('visible');
+
+            const canvas = document.getElementById('triangle-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fcfcf9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('A háromszög itt fog megjelenni', canvas.width / 2, canvas.height / 2);
+        }
+
+        // Kezdeti diagram
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('triangle-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fcfcf9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('A háromszög itt fog megjelenni', canvas.width / 2, canvas.height / 2);
+        });
+
+        // Enter billentyű támogatása
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                calculateTriangle();
+            }
+        });
+    </script>
+</body>
+</html>
